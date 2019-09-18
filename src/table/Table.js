@@ -13,6 +13,7 @@ import './styles.css'
 export const ActionLink = {
     LINK: 0,
     ANCHOR: 1,
+    POPCONFIRM: 2,
 }
 
 export class Table extends React.Component {
@@ -45,7 +46,7 @@ export class Table extends React.Component {
         super(props)
 
         this.state = {
-            sorter: {},
+            // sorter: {},
             filteredDataSource: props.dataSource,
             filters: {},
         }
@@ -66,9 +67,9 @@ export class Table extends React.Component {
     }
 
     // update sorting state
-    onTableChange(pagination, filters, sorter) {
-        this.setState({ sorter })
-    }
+    // onTableChange(pagination, filters, sorter) {
+    //     this.setState({ sorter })
+    // }
 
     // helper method to update the state of a filter. Will return the updated filters, so you can setState afterwards
     updateAndGetFilterStates(key, { value, filtered, visible } = {}) {
@@ -174,6 +175,19 @@ export class Table extends React.Component {
         return <Link to={config} key={2 * index}>{link.name}</Link>
     }
 
+    // for popconfirm actions
+    renderPopconfirm(index, link) {
+        const config = {
+            key: 2 * index,
+            ...link,
+        }
+        return (
+            <Popconfirm {...config}>
+                <a href={link.link}>{link.name}</a>
+            </Popconfirm>
+        )
+    }
+
     renderLinks(data) {
         const links = []
         for (const [index, link] of data.entries()) {
@@ -182,6 +196,8 @@ export class Table extends React.Component {
                     links.push(this.renderLink(index, link))
                 } else if (link.type === ActionLink.ANCHOR) {
                     links.push(this.renderAnchor(index, link))
+                } else if (link.type === ActionLink.POPCONFIRM) {
+                    links.push(this.renderPopconfirm(index, link))
                 }
                 links.push(<Divider type="vertical" key={(2 * index) + 1} />)
             }
@@ -193,24 +209,12 @@ export class Table extends React.Component {
     renderHeaderButton(key, data, styles) {
         const config = {
             key,
-            type: 'primary',
+            ...data,
             style: {
                 marginRight: '8px',
                 marginBottom: '6px',
                 ...styles,
             },
-        }
-        if (data.type) {
-            config.type = data.type
-        }
-        if (data.onClick) {
-            config.onClick = data.onClick
-        }
-        if (data.disabled) {
-            config.disabled = data.disabled
-        }
-        if (data.icon) {
-            config.icon = data.icon
         }
         return <Button {...config}>{data.name}</Button>
     }
@@ -293,7 +297,7 @@ export class Table extends React.Component {
     }
 
     setUpColumns(tableConfig) {
-        const { sorter } = this.state
+        // const { sorter } = this.state
         const newTableConfig = { ...tableConfig }
         for (const column of newTableConfig.columns) {
             if (column.colType === 'datetime') {
@@ -307,10 +311,9 @@ export class Table extends React.Component {
                 }
             }
 
-            if (column.sorter) {
-                column.sortOrder = sorter.columnKey === column.key && sorter.order
-                newTableConfig.onChange = (pagination, filters, sorterFunc) => this.onTableChange(pagination, filters, sorterFunc)
-            }
+            // if (column.sorter) {
+            //     newTableConfig.onChange = (pagination, filters, sorterFunc) => this.onTableChange(pagination, filters, sorterFunc)
+            // }
 
             if (column.searcher) {
                 const { dataIndex } = column
